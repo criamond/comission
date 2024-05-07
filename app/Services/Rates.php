@@ -58,7 +58,7 @@ class Rates implements RatesInterface
     public function setRates(string $startDate, string $endDate): void
     {
         $key = array_search($this->basicCurrency, $this->currenciesList);
-        if ($key !== false) {
+        if (false !== $key) {
             unset($this->currenciesList[$key]);
         }
         $currenciesForSearch = implode(',', $this->currenciesList);
@@ -73,7 +73,7 @@ class Rates implements RatesInterface
         try {
             $startDate = Carbon::createFromDate($startDate);
             $endDate   = Carbon::createFromDate($endDate);
-        } catch (\Exception $e){
+        } catch (Exception $e) {
             throw new Exception("Not valid input file format");
         }
 
@@ -107,9 +107,9 @@ class Rates implements RatesInterface
     /**
      * Get the exchange rate for a specific currency and date.
      *
-     * @param   string  $baseCurrency  The base currency.
-     * @param   string  $convCurrency  The currency to convert to.
-     * @param   string  $date          The date of the exchange rate.
+     * @param string $baseCurrency The base currency.
+     * @param string $convCurrency The currency to convert to.
+     * @param string $date The date of the exchange rate.
      *
      * @return float The exchange rate.
      * @throws Exception
@@ -119,7 +119,7 @@ class Rates implements RatesInterface
         if ($baseCurrency != $convCurrency) {
             try {
                 $rate = $this->rates[$date][$convCurrency];
-            } catch (\Exception $e){
+            } catch (Exception $e) {
                 throw new Exception("Not valid currencies in input file");
             }
 

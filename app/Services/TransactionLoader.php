@@ -32,7 +32,7 @@ class TransactionLoader
      * @param array $transactions The array of transactions to load.
      * @param RatesInterface $rates An object providing currency exchange rates.
      *
-     * @return \Illuminate\Support\Collection A collection of TransactionDTO objects.
+     * @return Collection A collection of TransactionDTO objects.
      */
     public function LoadTransactions(array $transactions, RatesInterface $rates): Collection
     {

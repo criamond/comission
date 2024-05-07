@@ -18,10 +18,11 @@ class CountCommission
     private float $weeklyThresholdPrivate;
     private int $countTransactionsWeekNoFee;
 
-    public function __construct(){
-        $this->withdrawCommissionPrivate=config('transactionsettings.withdraw_commission_private');
-        $this->weeklyThresholdPrivate= config('transactionsettings.weekly_threshold_private');
-        $this->countTransactionsWeekNoFee= config('transactionsettings.count_transactions_week_no_fee');
+    public function __construct()
+    {
+        $this->withdrawCommissionPrivate = config('transactionsettings.withdraw_commission_private');
+        $this->weeklyThresholdPrivate = config('transactionsettings.weekly_threshold_private');
+        $this->countTransactionsWeekNoFee = config('transactionsettings.count_transactions_week_no_fee');
     }
     /**
      * Calculate commission fees for transactions.
@@ -79,9 +80,7 @@ class CountCommission
         $dateCurrentTransaction = Carbon::parse($transaction->date);
 
         //filtering transactions that made before for current week
-        $filteredTransactions = $transactionsCollection->filter(function ($transaction, $transactionNumberIterator)
-        use ($idClient, $dateCurrentTransaction, $transactionNumber)
-        {
+        $filteredTransactions = $transactionsCollection->filter(function ($transaction, $transactionNumberIterator) use ($idClient, $dateCurrentTransaction, $transactionNumber) {
             if ($transaction->userId == $idClient and "withdraw" == $transaction->transactionType and $transactionNumberIterator <= $transactionNumber) {
                 $transactionDate = Carbon::parse($transaction->date);
                 $dayOfWeek = $transactionDate->dayOfWeek;
@@ -102,7 +101,7 @@ class CountCommission
         });
 
         //if transactions per week >3 we take a commission
-        if($filteredTransactions->count()>$this->countTransactionsWeekNoFee){
+        if($filteredTransactions->count() > $this->countTransactionsWeekNoFee) {
             return $transaction->amount * $this->withdrawCommissionPrivate;
         }
 

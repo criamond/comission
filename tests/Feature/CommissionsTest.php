@@ -2,14 +2,11 @@
 
 namespace Tests\Feature;
 
-use Illuminate\Support\Facades\Artisan;
 use Tests\TestCase;
 
 class CommissionsTest extends TestCase
 {
     /**
-     *
-     *
      * @return void
      */
 
@@ -32,7 +29,7 @@ class CommissionsTest extends TestCase
             "0.00\n" .
             "8,623.23\n";
 
-        $output= shell_exec("php artisan process-commissions $filePath");
+        $output = shell_exec("php artisan process-commissions $filePath");
         $this->assertEquals($expectedOutput, $output);
 
     }
