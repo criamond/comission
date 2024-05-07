@@ -27,6 +27,7 @@ The approach was chosen to obtain all exchange rates for a period of dates inste
 3. Set up configuration:
 
    Copy the `.env.example` file to `.env` and configure it with your environment variables.
+   You can also edit /config/transactionsettings.php 
 
 ## Usage
 

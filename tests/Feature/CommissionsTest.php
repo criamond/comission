@@ -17,7 +17,8 @@ class CommissionsTest extends TestCase
     {
         $filePath = 'test.csv';
 
-        $expectedOutput = "0.60\n" .
+        $expectedOutput =
+            "0.60\n" .
             "3.00\n" .
             "0.00\n" .
             "0.06\n" .
@@ -31,7 +32,8 @@ class CommissionsTest extends TestCase
             "0.00\n" .
             "8,623.23\n";
 
-        $this->artisan("process-commissions $filePath")->expectsOutput($expectedOutput);
+        $output= shell_exec("php artisan process-commissions $filePath");
+        $this->assertEquals($expectedOutput, $output);
 
     }
 

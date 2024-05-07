@@ -14,6 +14,15 @@ use Illuminate\Support\Collection;
  */
 class CountCommission
 {
+    private float $withdrawCommissionPrivate;
+    private float $weeklyThresholdPrivate;
+    private int $countTransactionsWeekNoFee;
+
+    public function __construct(){
+        $this->withdrawCommissionPrivate=config('transactionsettings.withdraw_commission_private');
+        $this->weeklyThresholdPrivate= config('transactionsettings.weekly_threshold_private');
+        $this->countTransactionsWeekNoFee= config('transactionsettings.count_transactions_week_no_fee');
+    }
     /**
      * Calculate commission fees for transactions.
      *
@@ -53,6 +62,7 @@ class CountCommission
         return $outCommissions;
     }
 
+
     /**
      * Calculate commission fee for a private user.
      *
@@ -68,7 +78,10 @@ class CountCommission
         $idClient = $transaction->userId;
         $dateCurrentTransaction = Carbon::parse($transaction->date);
 
-        $filteredTransactions = $transactionsCollection->filter(function ($transaction, $transactionNumberIterator) use ($idClient, $dateCurrentTransaction, $transactionNumber) {
+        //filtering transactions that made before for current week
+        $filteredTransactions = $transactionsCollection->filter(function ($transaction, $transactionNumberIterator)
+        use ($idClient, $dateCurrentTransaction, $transactionNumber)
+        {
             if ($transaction->userId == $idClient and "withdraw" == $transaction->transactionType and $transactionNumberIterator <= $transactionNumber) {
                 $transactionDate = Carbon::parse($transaction->date);
                 $dayOfWeek = $transactionDate->dayOfWeek;
@@ -88,12 +101,19 @@ class CountCommission
             return false;
         });
 
+        //if transactions per week >3 we take a commission
+        if($filteredTransactions->count()>$this->countTransactionsWeekNoFee){
+            return $transaction->amount * $this->withdrawCommissionPrivate;
+        }
+
         $weeklySumm = $filteredTransactions->sum(function ($transaction) use ($rates) {
             return  $transaction->amount / $transaction->rate;
         });
 
-        if ($weeklySumm > config('transactionsettings.weekly_threshold_private') + 0.00001) {
-            $summOverLimit = $weeklySumm - config('transactionsettings.weekly_threshold_private');
+
+        //if transactions sum on current week > 1000EUR we take commission for current transaction
+        if ($weeklySumm > $this->weeklyThresholdPrivate + 0.00001) {
+            $summOverLimit = $weeklySumm - $this->weeklyThresholdPrivate;
 
             if ($summOverLimit < $transaction->amount / $transaction->rate) {
                 $summFinal = $summOverLimit * $transaction->rate;
@@ -101,7 +121,7 @@ class CountCommission
                 $summFinal = $transaction->amount;
             }
 
-            return config('transactionsettings.withdraw_commission_private') * $summFinal;
+            return $this->withdrawCommissionPrivate * $summFinal;
         } else {
             return 0;
         }
