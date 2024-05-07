@@ -1,6 +1,7 @@
 # Commission Calculator
 
 Commission Calculator is a PHP application designed to calculate commission fees for financial transactions based on predefined rules.
+The approach was chosen to obtain all exchange rates for a period of dates instead of requesting the exchange rate for each transaction because of external API limits 
 
 ## Features
 
@@ -35,7 +36,7 @@ To use the Commission Calculator, follow these steps:
 2. Run the command-line interface provided by the application:
 
     ```bash
-    php artisan calculate:commissions path/to/transactions.csv
+    php artisan process-commissions path/to/transactions.csv
     ```
 
    Replace `path/to/transactions.csv` with the path to your CSV file.
