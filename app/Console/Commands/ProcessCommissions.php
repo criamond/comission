@@ -55,7 +55,7 @@ class ProcessCommissions extends Command
         $output_data = $commission->getCommission($transactionsListDTO, $rates);
 
         foreach ($output_data as $item) {
-            echo $item, "\n";
+            echo number_format($item,2), "\n";
         }
 
     }
