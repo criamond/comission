@@ -70,8 +70,12 @@ class Rates implements RatesInterface
             "apikey: " . config('transactionsettings.api_key_currency')
         ));
 
-        $startDate = Carbon::createFromDate($startDate);
-        $endDate = Carbon::createFromDate($endDate);
+        try {
+            $startDate = Carbon::createFromDate($startDate);
+            $endDate   = Carbon::createFromDate($endDate);
+        } catch (\Exception $e){
+            throw new Exception("Not valid input file format");
+        }
 
         $fullPageResult = [];
         for ($currentStartDate = $startDate; $currentStartDate <= $endDate; $currentStartDate->addYear()) {
@@ -103,16 +107,22 @@ class Rates implements RatesInterface
     /**
      * Get the exchange rate for a specific currency and date.
      *
-     * @param string $baseCurrency The base currency.
-     * @param string $convCurrency The currency to convert to.
-     * @param string $date The date of the exchange rate.
+     * @param   string  $baseCurrency  The base currency.
+     * @param   string  $convCurrency  The currency to convert to.
+     * @param   string  $date          The date of the exchange rate.
      *
      * @return float The exchange rate.
+     * @throws Exception
      */
     public function getRate(string $baseCurrency, string $convCurrency, string $date): float
     {
         if ($baseCurrency != $convCurrency) {
-            $rate = $this->rates[$date][$convCurrency];
+            try {
+                $rate = $this->rates[$date][$convCurrency];
+            } catch (\Exception $e){
+                throw new Exception("Not valid currencies in input file");
+            }
+
         } else {
             $rate = 1;
         }

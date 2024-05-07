@@ -41,8 +41,9 @@ To use the Commission Calculator, follow these steps:
     ```
 
    Replace `path/to/transactions.csv` with the path to your CSV file.
+   test.csv is a default file with transactions
 
-3. View the calculated commission fees displayed in the console.
+4. View the calculated commission fees displayed in the console.
 
 ## Configuration
 

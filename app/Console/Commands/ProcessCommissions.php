@@ -32,15 +32,14 @@ class ProcessCommissions extends Command
     public function handle(CountCommission $commission, RatesInterface $rates, TransactionLoader $transactionLoader)
     {
 
-
         try {
             $fileContent = file_get_contents($this->argument('file'));
-            $regExpressionParsing='/(\d{4}-\d\d-\d\d),(\d+),(\w+),(\w+),([\d,\.]+),(\w+)/';
+            $regExpressionParsing='/(\d{4}-\d\d-\d\d),(\d+),(private|business),(withdraw|deposit),([\d,\.]+),(\w+)/';
 
             preg_match_all($regExpressionParsing, $fileContent, $transactionMatches);
 
-            if(!$transactionMatches[1][1]){
-                exit("Error: wrong file format" );
+            if(!isset($transactionMatches[1][1])){
+                exit("Error: Wrong file format" );
             }
 
             $transactionsListDTO = $transactionLoader->LoadTransactions($transactionMatches, $rates);
@@ -52,7 +51,11 @@ class ProcessCommissions extends Command
 
         }
 
-        $output_data = $commission->getCommission($transactionsListDTO, $rates);
+        try {
+            $output_data = $commission->getCommission($transactionsListDTO, $rates);
+        } catch (Exception $exception){
+            exit("Error: " . $exception->getMessage());
+        }
 
         foreach ($output_data as $item) {
             echo number_format($item,2), "\n";
