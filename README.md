@@ -41,9 +41,10 @@ To use the Commission Calculator, follow these steps:
     ```
 
    Replace `path/to/transactions.csv` with the path to your CSV file.
-   test.csv is a default file with transactions
+   test.csv is a default file with transactions for docker.
 
-4. View the calculated commission fees displayed in the console.
+3. View the calculated commission fees displayed in the console. 
+   Commissions based on currencies rate on date of transaction
 
 ## Configuration
 
