@@ -7,16 +7,28 @@ namespace App\Services;
 use Carbon\Carbon;
 use Illuminate\Support\Collection;
 
+/**
+ * Class CountCommission
+ *
+ * Service class for calculating commission fees.
+ */
 class CountCommission
 {
+    /**
+     * Calculate commission fees for transactions.
+     *
+     * @param Collection $transactionsCollection The collection of transactions.
+     * @param RatesInterface $rates An object providing currency exchange rates.
+     *
+     * @return array An array of commission fees for each transaction.
+     */
     public function getCommission(Collection $transactionsCollection, RatesInterface $rates): array
     {
-
         $outCommissions = [];
 
         foreach ($transactionsCollection as $transactionNumber => $transaction) {
-
             $commission = 0;
+
             switch ($transaction->transactionType) {
                 case 'deposit':
                     $commission = config('transactionsettings.deposit_commission') * $transaction->amount;
@@ -28,23 +40,32 @@ class CountCommission
                             $commission = config('transactionsettings.withdraw_commission_business') * $transaction->amount;
                             break;
                         case 'private':
-                            $commission = $this->calculatePrivateComission($transactionsCollection, $transactionNumber, $rates);
+                            $commission = $this->calculatePrivateCommission($transactionsCollection, $transactionNumber, $rates);
                             break;
                     }
                     break;
             }
+
             $multiplier = pow(10, config('transactionsettings.currency_precision'));
-            $outCommissions[]= ceil($commission * $multiplier) / $multiplier;
+            $outCommissions[] = ceil($commission * $multiplier) / $multiplier;
         }
 
         return $outCommissions;
     }
 
-    private function calculatePrivateComission(Collection $transactionsCollection, int $transactionNumber, RatesInterface $rates): float
+    /**
+     * Calculate commission fee for a private user.
+     *
+     * @param Collection $transactionsCollection The collection of transactions.
+     * @param int $transactionNumber The number of the current transaction.
+     * @param RatesInterface $rates An object providing currency exchange rates.
+     *
+     * @return float The commission fee for the private user.
+     */
+    private function calculatePrivateCommission(Collection $transactionsCollection, int $transactionNumber, RatesInterface $rates): float
     {
         $transaction = $transactionsCollection[$transactionNumber];
         $idClient = $transaction->userId;
-
         $dateCurrentTransaction = Carbon::parse($transaction->date);
 
         $filteredTransactions = $transactionsCollection->filter(function ($transaction, $transactionNumberIterator) use ($idClient, $dateCurrentTransaction, $transactionNumber) {
@@ -53,6 +74,7 @@ class CountCommission
                 $dayOfWeek = $transactionDate->dayOfWeek;
                 $dayOfWeekCurrent = $dateCurrentTransaction->dayOfWeek;
                 $diffDays = $dateCurrentTransaction->diffInDays($transactionDate);
+
                 if ($diffDays < 7) {
                     if ((0 != $dayOfWeekCurrent and ($dayOfWeekCurrent >= $dayOfWeek) and $dayOfWeek > 0) or
                         (0 == $dayOfWeekCurrent)) {
@@ -61,20 +83,19 @@ class CountCommission
                         return false;
                     }
                 }
-
             }
 
             return false;
         });
 
         $weeklySumm = $filteredTransactions->sum(function ($transaction) use ($rates) {
-
             return  $transaction->amount / $transaction->rate;
         });
 
         if ($weeklySumm > config('transactionsettings.weekly_threshold_private') + 0.00001) {
             $summOverLimit = $weeklySumm - config('transactionsettings.weekly_threshold_private');
-            if($summOverLimit < $transaction->amount / $transaction->rate) {
+
+            if ($summOverLimit < $transaction->amount / $transaction->rate) {
                 $summFinal = $summOverLimit * $transaction->rate;
             } else {
                 $summFinal = $transaction->amount;
@@ -84,7 +105,5 @@ class CountCommission
         } else {
             return 0;
         }
-
     }
-
 }
